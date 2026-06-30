@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BTimely
 
-## Getting Started
+AI-powered time estimation that learns your personal pace.
 
-First, run the development server:
+## What it does
+
+1. **Describe or upload** a task (assignment, work item, personal errand)
+2. **Get an AI estimate** with reasoning and a time breakdown
+3. **Mark complete** and log how long it actually took
+4. **BTimely learns** from your feedback and personalizes future estimates
+
+## Quick start
 
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your OPENAI_API_KEY to .env (optional — demo mode works without it)
+
+# Initialize database
+npm run db:push
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) for the landing page, or [http://localhost:3000/app](http://localhost:3000/app) to use the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 16** (App Router, React 19)
+- **Tailwind CSS 4** for styling
+- **Prisma + SQLite** for data (swap to PostgreSQL for production)
+- **OpenAI GPT-4o-mini** for cost-efficient estimates (~$0.001–0.003 per estimate)
 
-## Learn More
+## How personalization works
 
-To learn more about Next.js, take a look at the following resources:
+BTimely uses an exponential moving average (EMA) to track:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- A **global pace multiplier** (are you generally faster or slower than estimates?)
+- **Per-category multipliers** (homework vs work vs personal, etc.)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+After each completed task, these calibrations update automatically. The AI prompt also includes your recent actual-vs-estimated history for smarter base estimates.
 
-## Deploy on Vercel
+## Project structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── page.tsx          # Landing page
+│   ├── app/page.tsx      # Main dashboard
+│   └── api/              # REST API routes
+├── components/           # UI components
+└── lib/
+    ├── ai.ts             # OpenAI integration
+    ├── personalization.ts # Learning algorithm
+    └── db.ts             # Prisma client
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | SQLite path or Postgres connection string |
+| `OPENAI_API_KEY` | No | Enables real AI estimates (demo mode without it) |
+
+## Production deployment
+
+See [LAUNCH_GUIDE.md](./LAUNCH_GUIDE.md) for full deployment and App Store instructions.
+
+Recommended hosting: **Vercel** (free tier) + **Neon** or **Supabase** (free Postgres tier).
+
+## Business & pricing
+
+See [BUSINESS_PLAN.md](./BUSINESS_PLAN.md) for monetization strategy and cost analysis.

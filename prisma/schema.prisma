@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id          String      @id @default(cuid())
+  displayName String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tasks       Task[]
+  profile     UserProfile?
+}
+
+model UserProfile {
+  id                   String @id @default(cuid())
+  userId               String @unique
+  user                 User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  globalCalibration    Float  @default(1.0)
+  categoryCalibrations String @default("{}")
+  totalTasksCompleted  Int    @default(0)
+  avgAccuracy          Float?
+}
+
+model Task {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String
+  description         String
+  category            String
+  complexity          String
+  estimatedMinutes    Int
+  rawEstimatedMinutes Int
+  actualMinutes       Int?
+  status              String    @default("pending")
+  aiReasoning         String?
+  fileName            String?
+  createdAt           DateTime  @default(now())
+  completedAt         DateTime?
+}
